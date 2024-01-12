@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   const insertUsers = await data();
-  console.log("Inserted a user........" + insertUsers);
+  console.log("Inserted a user......." + insertUsers);
   res.send("Created a user....").status(200);
 });
 
