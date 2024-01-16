@@ -5,10 +5,17 @@ const router = express.Router();
 
 const bcrypt = require("bcrypt");
 
-const checkIfUserExists = async (username, password) => {
+const checkIfUserNameExists = async (username) => {
+  console.log("Check username " + username);
   const db = await getDBConnection();
   const user = await db.collection('users').findOne({ userName: username });
   return user;
+}
+
+const checkIfEmailExists = async (email) => {
+  const db = await getDBConnection();
+  const userEmail = db.collection("users").findOne({ email: email });
+  return userEmail;
 }
 
 const registerUser = async (firstName, lastName, userName, email, password) => {
@@ -23,7 +30,7 @@ const registerUser = async (firstName, lastName, userName, email, password) => {
   const insertUser = await db.collection("users").insertOne({firstName: firstName, lastName: lastName, userName: userName, email: email, password: hashPassword});
 
   if(insertUser && insertUser.insertedId){
-    console.log("User was created! " + insertUser[0].userName);
+    console.log("User was created! " + insertUser.insertedId);
     return insertUser;
   }else{
     console.error("Error registering user......" + insertUser);
@@ -45,25 +52,33 @@ router.get("/getUsers", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const {userName, password} = req.query;
-  const doesUserExist = await checkIfUserExists(userName, password);
-  doesUserExist ?  res.send(doesUserExist).status(200) :  res.sendStatus(401);
+  console.log("Check req");
+  console.log(req.body);
+  const {userName, password} = req.body;
+  const doesUserNameExist = await checkIfUserNameExists(userName, password); //need to change this to check if user exists....check if username and password matches...
+  doesUserNameExist ?  res.send(doesUserNameExist).status(200) :  res.send(`Username ${userName} or password doesn't match....`).status(401);
 });
 
 
 router.post("/register", async (req, res) => {
-  console.log("HIT?");
   const {firstName, lastName, userName, email, password} = req.query;
-  const doesUserExist = await checkIfUserExists(userName, password);
+  const doesUserExist = await checkIfUserNameExists(userName);
+  const doesEmailExist = await checkIfEmailExists(email);
 
   if(doesUserExist){
-    console.log("Users already exist, logging in........");
-    return res.send("User exists.........").status(401);
+    console.log(`Username ${userName} already exist........`);
+    console.log(doesUserExist);
+    return res.send(`Username ${userName} already exists.........`).status(401);
+  }else if (doesEmailExist){
+    console.log(`Email ${email} already exist........`);
+    console.log(doesEmailExist);
+    return res.send(`Email ${email} already exists.........`).status(401);
   }else{
     console.log("Registering user........");
     const userRegistered = await registerUser(firstName, lastName, userName, email, password);
     return res.send(userRegistered).status(200);
   }
+
 });
 
 module.exports = router;
