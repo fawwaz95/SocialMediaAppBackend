@@ -52,7 +52,7 @@ router.get("/getUsers", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  console.log("Check req");
+  console.log("Check req ");
   console.log(req.body);
   const {userName, password} = req.body;
   const doesUserNameExist = await checkIfUserNameExists(userName, password); //need to change this to check if user exists....check if username and password matches...
