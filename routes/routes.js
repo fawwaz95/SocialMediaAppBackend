@@ -18,6 +18,25 @@ const checkIfEmailExists = async (email) => {
   return userEmail;
 }
 
+const checkIfUserExists = async (userName, password) => {
+  const db = await getDBConnection();
+  const getUser = await db.collection("users").findOne({userName: userName});
+
+  if(!getUser){
+    return { success: false, message: `No user found for the following userName ${userName}` };
+  }
+
+  const comparePassword = await bcrypt.compare(password, getUser.password);
+
+  if(!comparePassword){
+    return { success: false, message: `Password doesn't match for the following userName ${userName}` };
+  }
+
+  return getUser.userName;
+}
+
+
+
 const registerUser = async (firstName, lastName, userName, email, password) => {
 
   if (!firstName || !lastName || !userName || !email || !password) {
@@ -52,13 +71,10 @@ router.get("/getUsers", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  console.log("Check req ");
-  console.log(req.body);
   const {userName, password} = req.body;
-  const doesUserNameExist = await checkIfUserNameExists(userName, password); //need to change this to check if user exists....check if username and password matches...
-  doesUserNameExist ?  res.send(doesUserNameExist).status(200) :  res.send(`Username ${userName} or password doesn't match....`).status(401);
+  const getUserInfo = await checkIfUserExists(userName, password);
+  getUserInfo ?  res.json(getUserInfo).status(200) :  res.send(`Username ${userName} or password doesn't match....`).status(401);
 });
-
 
 router.post("/register", async (req, res) => {
   const {firstName, lastName, userName, email, password} = req.query;
