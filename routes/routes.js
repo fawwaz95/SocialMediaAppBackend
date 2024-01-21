@@ -16,43 +16,50 @@ const getUserProfile = async (userName) => {
   const db = await getDBConnection();
   const getProfile = await db.collection("profile").findOne({userName: userName});
 
-  const userProfile = {
-    success: true,
-    ...getProfile
-  };
+  if(getProfile && getProfile.userName){
+    console.log(`Found a user with userName ${userName}`);
+    const userProfile = {success: true,  ...getProfile};
+    return userProfile;
+  }else{
+    console.log(`userName doesnt exist ${userName}`);
+    const userProfile = { success: false };
+    return userProfile;
+  }
 
-  return userProfile;
 }
 
 const checkIfEmailExists = async (email) => {
   const db = await getDBConnection();
-  const getEmail = db.collection("users").findOne({ email: email });
+  const getUserByEmail = await db.collection("users").findOne({ email: email });
 
-  const userEmail = {
-    success: true,
-    ...getEmail
-  };
+  if(getUserByEmail && getUserByEmail.email){
+    console.log(`Found a user with email ${email}`);
+    const userInfo = {success: true,  ...getEmail};
+    return userInfo;
+  }else{
+    console.log(`Email doesnt exist ${email}`);
+    const userInfo = { success: false };
+    return userInfo;
+  }
 
-  return userEmail;
 }
 
 const checkIfUserExists = async (userName, password) => {
 
   if (!userName || !password) {
-    console.log("DOESNT EXISTS");
-    return { success: false, message: "Please define both username and password." };
+    throw { statusCode: 400, message: "Please define both username and password." };
   }
 
   const user = await getUser(userName);
 
   if(!user){
-    return { success: false, message: `No user found for the following userName ${userName}` };
+    throw { statusCode: 400, message: `No user found for the following userName ${userName}` };
   }
 
   const comparePassword = await bcrypt.compare(password, user.password);
 
   if(!comparePassword){
-    return { success: false, message: `Password doesn't match for the following userName ${userName}` };
+    throw { statusCode: 400, message: `Password doesnt match for the following userName ${userName}` };
   }
 
   const userInfo = {
@@ -65,7 +72,7 @@ const checkIfUserExists = async (userName, password) => {
 
 const createProfile = async (firstName, lastName, userName, email) => {
   if (!firstName || !lastName || !userName || !email) {
-    return { success: false, message: "All fields are required." };
+    return res.status(400).send({success: false, message: "All fields are required." });
   }
 
   const db = await getDBConnection();
@@ -82,15 +89,16 @@ const createProfile = async (firstName, lastName, userName, email) => {
 
     return userProfile;
   }else{
-    return {success: false, message: `Unable to create User Profile with userName ${userName}`}
+    throw { statusCode: 400, message: `Unable to create User Profile with userName ${userName}` }
   }
+
 }
 
 
 const registerUser = async (firstName, lastName, userName, email, password) => {
 
   if (!firstName || !lastName || !userName || !email || !password) {
-    return { success: false, message: "All fields are required." };
+    throw {statusCode: 400, message: "All fields are required."};
   }
 
   const hashPassword = await bcrypt.hash(password, 12);
@@ -108,7 +116,7 @@ const registerUser = async (firstName, lastName, userName, email, password) => {
 
     return createdUser;
   }else{
-    return {success: false, message: `Unable to register user.....${userName}`}
+    throw {statusCode: 400, message: `Unable to register user.....${userName}`};
   }
 }
 
@@ -126,51 +134,52 @@ router.get("/getUsers", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const {userName, password} = req.body;
-  const getUserInfo = await checkIfUserExists(userName, password);
+  try{
+    const {userName, password} = req.body;
+    const getUserInfo = await checkIfUserExists(userName, password);
+    const userProfile = await getUserProfile(getUserInfo.userName); 
+  
+    console.log("User profile.....");
+    console.log(userProfile);
 
-  if(getUserInfo.success === false){
-    return res.send(getUserInfo.message);
+    res.status(200).json(userProfile)
+  }catch(error){
+    console.error(error.statusCode + " " + error.message);
+    res.status(error.statusCode || 500).json({ success: false, message: error.message })
   }
 
-  const userProfile = await getUserProfile(getUserInfo.userName); 
-
-  console.log("User profile.....");
-  console.log(userProfile);
-
-
-  res.send(userProfile).status(200);
 });
 
 router.post("/register", async (req, res) => {
-  const {firstName, lastName, userName, email, password} = req.query;
-  const doesUserExist = await getUser(userName);
-  const doesEmailExist = await checkIfEmailExists(email);
-
-  if(doesUserExist){
-    console.log(`Username ${userName} already exist........`);
-    console.log(doesUserExist);
-    return res.send(`Username ${userName} already exists.........`).status(401);
-  }else if (doesEmailExist){
-    console.log(`Email ${email} already exist........`);
-    console.log(doesEmailExist);
-    return res.send(`Email ${email} already exists.........`).status(401);
-  }else{
-    console.log("Registering user........");
-    const userRegistered = await registerUser(firstName, lastName, userName, email, password);
-
-    if(userRegistered.success === false){
-      return res.send(userRegistered.message);
+  try{
+    const {firstName, lastName, userName, email, password} = req.body;
+    const doesUserExist = await getUser(userName);
+    const doesEmailExist = await checkIfEmailExists(email);
+  
+    if(doesUserExist){
+      console.log(`Username ${userName} already exist........`);
+      console.log(doesUserExist);
+      return res.status(400).send( { success: false, message: `Username ${userName} already exists.........`});
+    }else if (doesEmailExist){
+      console.log(`Email ${email} already exist........`);
+      console.log(doesEmailExist);
+      return res.status(400).send( { success: false, message: `Email ${email} already exists.........`});
+    }else{
+      console.log("Registering user........");
+      const userRegistered = await registerUser(firstName, lastName, userName, email, password);
+      const creatingProfile = await createProfile(firstName, lastName, userName, email);
+      const userProfile = await getUserProfile(userName); 
+  
+      console.log("Here is the user after registration ");
+      console.log(userProfile);
+  
+      return res.status(200).json(userProfile);
     }
-
-    const creatingProfile = await createProfile(firstName, lastName, userName, email);
-    const userProfile = await getUserProfile(userName); 
-
-    console.log("Here is the user after registration ");
-    console.log(userProfile);
-
-    return res.send(userProfile).status(200);
+  }catch(error){
+    console.error(error.statusCode + " " + error.message);
+    res.status(error.status || 500).json({ success: false, message: error.message });
   }
+  
 });
 
 module.exports = router;
