@@ -15,7 +15,7 @@ const getUser = async (username) => {
   console.log(user);
 
   if (!user) {
-    return { success: false, message: `userName doesn't exist ${username}` };
+    throw { statusCode: 400, message: `Username of password doesn't match` };
   }
 
   return { success: true, ...user };
@@ -26,7 +26,7 @@ const getUserProfile = async (userName) => {
   const getProfile = await db.collection("profile").findOne({ userName: userName });
 
   if (!getProfile) {
-    return { success: false, message: `User profile doesn't exist ${userName}` }
+    throw { statusCode: 400, message: `User profile doesn't exist ${userName}` }
   }
 
   return { success: true, ...getProfile }
@@ -38,7 +38,7 @@ const checkIfEmailExists = async (email) => {
   const getUserByEmail = await db.collection("users").findOne({ email: email });
 
   if (!getUserByEmail) {
-    return { success: false, message: `This Email is not ${email}` };
+    throw { statusCode: 400, message: `This Email is not ${email}` };
   }
 
   return { success: true, ...getUserByEmail };
@@ -59,7 +59,7 @@ const checkIfUserExists = async (userName, password) => {
   const comparePassword = await bcrypt.compare(password, user.password);
 
   if (!comparePassword) {
-    throw { statusCode: 400, message: `Password doesnt match for the following userName ${userName}` };
+    throw { statusCode: 400, message: `Username of password doesn't match` };
   }
 
   return { success: true, ...user };
@@ -67,7 +67,7 @@ const checkIfUserExists = async (userName, password) => {
 
 const createProfile = async (firstName, lastName, userName, email) => {
   if (!firstName || !lastName || !userName || !email) {
-    return res.status(400).send({ success: false, message: "All fields are required." });
+    throw { statusCode: 400, message: "All fields are required." };
   }
 
   try {
@@ -75,7 +75,7 @@ const createProfile = async (firstName, lastName, userName, email) => {
     const insertProfile = await db.collection("profile").insertOne({ firstName, lastName, userName, email, bio: "", location: "" });
 
     if (!insertProfile) {
-      return { success: false, message: "User profile not found" };
+      throw { statusCode: 400, message: "User profile not found" };
     }
 
     const getProfile = await getUserProfile(userName);
@@ -103,7 +103,7 @@ const registerUser = async (firstName, lastName, userName, email, password) => {
     const insertUser = await db.collection("users").insertOne({ firstName: firstName, lastName: lastName, userName: userName, email: email, password: hashPassword });
 
     if(!insertUser){
-      return { success: false, message: "Unable to create user" };
+      throw { success: false, message: "Unable to create user" };
     }
 
     return { success: true, ...insertUser };
