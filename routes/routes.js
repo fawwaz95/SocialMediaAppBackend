@@ -4,27 +4,32 @@ const data = require("../db/data.js");
 const router = express.Router();
 
 const bcrypt = require("bcrypt");
+const e = require("express");
 
 const getUser = async (username) => {
   console.log("Check username " + username);
   const db = await getDBConnection();
   const user = await db.collection('users').findOne({ userName: username });
-  return user;
+
+  console.log("User thing");
+  console.log(user);
+
+  if (!user) {
+    return { success: false, message: `userName doesn't exist ${username}` };
+  }
+
+  return { success: true, ...user };
 }
 
 const getUserProfile = async (userName) => {
   const db = await getDBConnection();
-  const getProfile = await db.collection("profile").findOne({userName: userName});
+  const getProfile = await db.collection("profile").findOne({ userName: userName });
 
-  if(getProfile && getProfile.userName){
-    console.log(`Found a user with userName ${userName}`);
-    const userProfile = {success: true,  ...getProfile};
-    return userProfile;
-  }else{
-    console.log(`userName doesnt exist ${userName}`);
-    const userProfile = { success: false };
-    return userProfile;
+  if (!getProfile) {
+    return { success: false, message: `User profile doesn't exist ${userName}` }
   }
+
+  return { success: true, ...getProfile }
 
 }
 
@@ -32,16 +37,11 @@ const checkIfEmailExists = async (email) => {
   const db = await getDBConnection();
   const getUserByEmail = await db.collection("users").findOne({ email: email });
 
-  if(getUserByEmail && getUserByEmail.email){
-    console.log(`Found a user with email ${email}`);
-    const userInfo = {success: true,  ...getEmail};
-    return userInfo;
-  }else{
-    console.log(`Email doesnt exist ${email}`);
-    const userInfo = { success: false };
-    return userInfo;
+  if (!getUserByEmail) {
+    return { success: false, message: `This Email is not ${email}` };
   }
 
+  return { success: true, ...getUserByEmail };
 }
 
 const checkIfUserExists = async (userName, password) => {
@@ -52,45 +52,40 @@ const checkIfUserExists = async (userName, password) => {
 
   const user = await getUser(userName);
 
-  if(!user){
+  if (!user) {
     throw { statusCode: 400, message: `No user found for the following userName ${userName}` };
   }
 
   const comparePassword = await bcrypt.compare(password, user.password);
 
-  if(!comparePassword){
+  if (!comparePassword) {
     throw { statusCode: 400, message: `Password doesnt match for the following userName ${userName}` };
   }
 
-  const userInfo = {
-    success: true,
-    ...user,
-  };
-
-  return userInfo;
+  return { success: true, ...user };
 }
 
 const createProfile = async (firstName, lastName, userName, email) => {
   if (!firstName || !lastName || !userName || !email) {
-    return res.status(400).send({success: false, message: "All fields are required." });
+    return res.status(400).send({ success: false, message: "All fields are required." });
   }
 
-  const db = await getDBConnection();
-  const insertProfile = await db.collection("profile").insertOne({firstName, lastName, userName, email, bio: "", location: ""});
+  try {
+    const db = await getDBConnection();
+    const insertProfile = await db.collection("profile").insertOne({ firstName, lastName, userName, email, bio: "", location: "" });
 
-  if(insertProfile && insertProfile.insertedId){
-    console.log(`Successfully created a user profile for ${userName}!`);
-    const getProfile = await getUserProfile(userName);
-
-    const userProfile = {
-      success: true,
-      ...getProfile,
+    if (!insertProfile) {
+      return { success: false, message: "User profile not found" };
     }
 
-    return userProfile;
-  }else{
-    throw { statusCode: 400, message: `Unable to create User Profile with userName ${userName}` }
+    const getProfile = await getUserProfile(userName);
+    return { success: true, ...getProfile };
+
+  } catch (error) {
+    console.log("Error in creatProfile " + error);
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
+
 
 }
 
@@ -98,25 +93,23 @@ const createProfile = async (firstName, lastName, userName, email) => {
 const registerUser = async (firstName, lastName, userName, email, password) => {
 
   if (!firstName || !lastName || !userName || !email || !password) {
-    throw {statusCode: 400, message: "All fields are required."};
+    throw { statusCode: 400, message: "All fields are required." };
   }
 
-  const hashPassword = await bcrypt.hash(password, 12);
+  try {
+    const hashPassword = await bcrypt.hash(password, 12);
 
-  const db = await getDBConnection();
-  const insertUser = await db.collection("users").insertOne({firstName: firstName, lastName: lastName, userName: userName, email: email, password: hashPassword});
+    const db = await getDBConnection();
+    const insertUser = await db.collection("users").insertOne({ firstName: firstName, lastName: lastName, userName: userName, email: email, password: hashPassword });
 
-  if(insertUser && insertUser.insertedId){
-    console.log("User was created! " + insertUser.insertedId);
+    if(!insertUser){
+      return { success: false, message: "Unable to create user" };
+    }
 
-    const createdUser = {
-      success: true,
-      ...insertUser
-    };
-
-    return createdUser;
-  }else{
-    throw {statusCode: 400, message: `Unable to register user.....${userName}`};
+    return { success: true, ...insertUser };
+  } catch (error) {
+    console.error("Unable to register user......" + error)
+    res.status(error.statusCode || 500).json({ success: false, message: message });
   }
 }
 
@@ -134,16 +127,16 @@ router.get("/getUsers", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  try{
-    const {userName, password} = req.body;
+  try {
+    const { userName, password } = req.body;
     const getUserInfo = await checkIfUserExists(userName, password);
-    const userProfile = await getUserProfile(getUserInfo.userName); 
-  
+    const userProfile = await getUserProfile(getUserInfo.userName);
+
     console.log("User profile.....");
     console.log(userProfile);
 
     res.status(200).json(userProfile)
-  }catch(error){
+  } catch (error) {
     console.error(error.statusCode + " " + error.message);
     res.status(error.statusCode || 500).json({ success: false, message: error.message })
   }
@@ -151,35 +144,35 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-  try{
-    const {firstName, lastName, userName, email, password} = req.body;
+  try {
+    const { firstName, lastName, userName, email, password } = req.body;
     const doesUserExist = await getUser(userName);
     const doesEmailExist = await checkIfEmailExists(email);
-  
-    if(doesUserExist){
+
+    if (doesUserExist.success === true) {
       console.log(`Username ${userName} already exist........`);
       console.log(doesUserExist);
-      return res.status(400).send( { success: false, message: `Username ${userName} already exists.........`});
-    }else if (doesEmailExist){
+      return res.status(400).send({ success: false, message: `Username ${userName} already exists.........` });
+    } else if (doesEmailExist.success === true) {
       console.log(`Email ${email} already exist........`);
       console.log(doesEmailExist);
-      return res.status(400).send( { success: false, message: `Email ${email} already exists.........`});
-    }else{
+      return res.status(400).send({ success: false, message: `Email ${email} already exists.........` });
+    } else {
       console.log("Registering user........");
       const userRegistered = await registerUser(firstName, lastName, userName, email, password);
       const creatingProfile = await createProfile(firstName, lastName, userName, email);
-      const userProfile = await getUserProfile(userName); 
-  
+      const userProfile = await getUserProfile(userName);
+
       console.log("Here is the user after registration ");
       console.log(userProfile);
-  
+
       return res.status(200).json(userProfile);
     }
-  }catch(error){
+  } catch (error) {
     console.error(error.statusCode + " " + error.message);
     res.status(error.status || 500).json({ success: false, message: error.message });
   }
-  
+
 });
 
 module.exports = router;
