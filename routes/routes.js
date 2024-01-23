@@ -7,41 +7,50 @@ const bcrypt = require("bcrypt");
 const e = require("express");
 
 const getUser = async (username) => {
-  console.log("Check username " + username);
-  const db = await getDBConnection();
-  const user = await db.collection('users').findOne({ userName: username });
+    const db = await getDBConnection();
+    const user = await db.collection('users').findOne({ userName: username });
 
-  console.log("User thing");
-  console.log(user);
+    if (!db) {
+      throw { statusCode: 400, message: "Internal Error occured...." };
+    }
 
-  if (!user) {
-    throw { statusCode: 400, message: `Username of password doesn't match` };
-  }
+    if (!user) {
+      throw { statusCode: 400, message: "Username or password doesn't match" };
+    }
 
-  return { success: true, ...user };
+    return { success: true, ...user };
 }
 
 const getUserProfile = async (userName) => {
-  const db = await getDBConnection();
-  const getProfile = await db.collection("profile").findOne({ userName: userName });
+    const db = await getDBConnection();
+    const getProfile = await db.collection("profile").findOne({ userName: userName });
 
-  if (!getProfile) {
-    throw { statusCode: 400, message: `User profile doesn't exist ${userName}` }
-  }
+    if (!db) {
+      throw { statusCode: 400, message: "Internal Error occured...." };
+    }
 
-  return { success: true, ...getProfile }
+    if (!getProfile) {
+      throw { statusCode: 400, message: `User profile doesn't exist ${userName}` }
+    }
+
+    return { success: true, ...getProfile }
 
 }
 
 const checkIfEmailExists = async (email) => {
-  const db = await getDBConnection();
-  const getUserByEmail = await db.collection("users").findOne({ email: email });
+    const db = await getDBConnection();
+    const getUserByEmail = await db.collection("users").findOne({ email: email });
 
-  if (!getUserByEmail) {
-    throw { statusCode: 400, message: `This Email is not ${email}` };
-  }
+    if (!db) {
+      throw { statusCode: 400, message: "Internal Error occured...." };
+    }
 
-  return { success: true, ...getUserByEmail };
+    if (!getUserByEmail) {
+      throw { statusCode: 400, message: `This Email is not ${email}` };
+    }
+
+    return { success: true, ...getUserByEmail };
+
 }
 
 const checkIfUserExists = async (userName, password) => {
@@ -59,7 +68,7 @@ const checkIfUserExists = async (userName, password) => {
   const comparePassword = await bcrypt.compare(password, user.password);
 
   if (!comparePassword) {
-    throw { statusCode: 400, message: `Username of password doesn't match` };
+    throw { statusCode: 400, message: "Username or password doesn't match" };
   }
 
   return { success: true, ...user };
@@ -70,9 +79,12 @@ const createProfile = async (firstName, lastName, userName, email) => {
     throw { statusCode: 400, message: "All fields are required." };
   }
 
-  try {
     const db = await getDBConnection();
     const insertProfile = await db.collection("profile").insertOne({ firstName, lastName, userName, email, bio: "", location: "" });
+
+    if (!db) {
+      throw { statusCode: 400, message: "Internal Error occured...." };
+    }
 
     if (!insertProfile) {
       throw { statusCode: 400, message: "User profile not found" };
@@ -80,12 +92,6 @@ const createProfile = async (firstName, lastName, userName, email) => {
 
     const getProfile = await getUserProfile(userName);
     return { success: true, ...getProfile };
-
-  } catch (error) {
-    console.log("Error in creatProfile " + error);
-    res.status(error.statusCode || 500).json({ success: false, message: error.message });
-  }
-
 
 }
 
@@ -96,21 +102,20 @@ const registerUser = async (firstName, lastName, userName, email, password) => {
     throw { statusCode: 400, message: "All fields are required." };
   }
 
-  try {
     const hashPassword = await bcrypt.hash(password, 12);
 
     const db = await getDBConnection();
     const insertUser = await db.collection("users").insertOne({ firstName: firstName, lastName: lastName, userName: userName, email: email, password: hashPassword });
 
-    if(!insertUser){
+    if (!db) {
+      throw { statusCode: 400, message: "Internal Error occured...." };
+    }
+
+    if (!insertUser) {
       throw { success: false, message: "Unable to create user" };
     }
 
     return { success: true, ...insertUser };
-  } catch (error) {
-    console.error("Unable to register user......" + error)
-    res.status(error.statusCode || 500).json({ success: false, message: message });
-  }
 }
 
 /*router.get("/", async (req, res) => {
@@ -159,8 +164,8 @@ router.post("/register", async (req, res) => {
       return res.status(400).send({ success: false, message: `Email ${email} already exists.........` });
     } else {
       console.log("Registering user........");
-      const userRegistered = await registerUser(firstName, lastName, userName, email, password);
-      const creatingProfile = await createProfile(firstName, lastName, userName, email);
+      await registerUser(firstName, lastName, userName, email, password);
+      await createProfile(firstName, lastName, userName, email);
       const userProfile = await getUserProfile(userName);
 
       console.log("Here is the user after registration ");
