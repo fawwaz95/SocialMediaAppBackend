@@ -3,9 +3,8 @@ const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const router = express.Router();
 
-const bcrypt = require("bcrypt");
-const e = require("express");
-
+const { getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
+/*
 const getUser = async (username) => {
     const db = await getDBConnection();
     const user = await db.collection('users').findOne({ userName: username });
@@ -116,7 +115,7 @@ const registerUser = async (firstName, lastName, userName, email, password) => {
     }
 
     return { success: true, ...insertUser };
-}
+}*/
 
 /*router.get("/", async (req, res) => {
   const insertUsers = await data();
@@ -134,24 +133,28 @@ router.get("/getUsers", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { userName, password } = req.body;
-    const getUserInfo = await checkIfUserExists(userName, password);
-    const userProfile = await getUserProfile(getUserInfo.userName);
+    
+    /*const getUserInfo = await checkIfUserExists(userName, password);
+    console.log("Checking login/....");
+    console.log(getUserInfo);
+    const userProfile = await getUserProfile(getUserInfo.userName);*/
+
+    const login = await loginUser(userName, password);
 
     console.log("User profile.....");
-    console.log(userProfile);
+    console.log(login);
 
-    res.status(200).json(userProfile)
+    res.status(200).json(login)
   } catch (error) {
     console.error(error.statusCode + " " + error.message);
     res.status(error.statusCode || 500).json({ success: false, message: error.message })
   }
-
 });
 
 router.post("/register", async (req, res) => {
   try {
     const { firstName, lastName, userName, email, password } = req.body;
-    const doesUserExist = await getUser(userName);
+    /*const doesUserExist = await getUser(userName);
     const doesEmailExist = await checkIfEmailExists(email);
 
     if (doesUserExist.success === true) {
@@ -163,21 +166,24 @@ router.post("/register", async (req, res) => {
       console.log(doesEmailExist);
       return res.status(400).send({ success: false, message: `Email ${email} already exists.........` });
     } else {
-      console.log("Registering user........");
       await registerUser(firstName, lastName, userName, email, password);
       await createProfile(firstName, lastName, userName, email);
       const userProfile = await getUserProfile(userName);
-
-      console.log("Here is the user after registration ");
-      console.log(userProfile);
-
       return res.status(200).json(userProfile);
-    }
+    }*/
+
+    //const doesUserExist = await getUser(userName);
+    //const doesEmailExist = await checkIfEmailExists(email);
+    
+    await registerUser(firstName, lastName, userName, email, password);
+    await createProfile(firstName, lastName, userName, email);
+    const userProfile = await getUserProfile(userName);
+    return res.status(200).json(userProfile);
+
   } catch (error) {
     console.error(error.statusCode + " " + error.message);
     res.status(error.status || 500).json({ success: false, message: error.message });
   }
-
 });
 
 module.exports = router;
