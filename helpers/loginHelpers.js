@@ -69,7 +69,7 @@ module.exports = {
         }
 
         const db = await getDBConnection();
-        const insertProfile = await db.collection("profile").insertOne({ firstName, lastName, userName, email, bio: "", location: "" });
+        const insertProfile = await db.collection("profile").insertOne({ firstName, lastName, userName, email, bio: null, location: null, numberOfPosts: null, freinds: null, followers: null });
 
         if (!db) {
             throw { statusCode: 400, message: "Internal Error occured...." };
@@ -110,7 +110,7 @@ module.exports = {
         if (!firstName || !lastName || !userName || !email || !password) {
             throw { statusCode: 400, message: "All fields are required." };
         }
-        
+
         await module.exports.checkValidUsername(userName);
         await module.exports.checkValidEmail(email);
         await module.exports.checkValidPassword(password);

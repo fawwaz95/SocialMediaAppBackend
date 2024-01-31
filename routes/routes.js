@@ -153,27 +153,8 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
+    await data();
     const { firstName, lastName, userName, email, password } = req.body;
-    /*const doesUserExist = await getUser(userName);
-    const doesEmailExist = await checkIfEmailExists(email);
-
-    if (doesUserExist.success === true) {
-      console.log(`Username ${userName} already exist........`);
-      console.log(doesUserExist);
-      return res.status(400).send({ success: false, message: `Username ${userName} already exists.........` });
-    } else if (doesEmailExist.success === true) {
-      console.log(`Email ${email} already exist........`);
-      console.log(doesEmailExist);
-      return res.status(400).send({ success: false, message: `Email ${email} already exists.........` });
-    } else {
-      await registerUser(firstName, lastName, userName, email, password);
-      await createProfile(firstName, lastName, userName, email);
-      const userProfile = await getUserProfile(userName);
-      return res.status(200).json(userProfile);
-    }*/
-
-    //const doesUserExist = await getUser(userName);
-    //const doesEmailExist = await checkIfEmailExists(email);
     
     await registerUser(firstName, lastName, userName, email, password);
     await createProfile(firstName, lastName, userName, email);
