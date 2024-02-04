@@ -44,9 +44,28 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.get("/getProfile/:userName", async (req, res) => {
+
+  try{
+    const username = req.query.userName;
+
+    const {userName, firstName, lastName, bio, location} = await getUserProfile(username);
+    const userProfile = {userName, firstName, lastName, bio, location};
+  
+    return res.status(200).json(userProfile);
+  }catch(error){
+    console.error(error.statusCode + " " + error.message);
+    res.status(error.status || 500).json({ success: false, message: error.message });
+  }
+})
+
 router.post("/editProfile", async (req, res) => {
   try{
+   
     const {findUser, userName, firstName, lastName, location, bio} = req.body;
+    console.log("what is find user");    
+    console.log(findUser); 
+    
     const getUserInfo = await getUser(findUser);
     console.log("getUserInfo");
     console.log(getUserInfo);

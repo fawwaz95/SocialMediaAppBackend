@@ -1,12 +1,30 @@
 const getDBConnection = require("../db/conn.js");
+const {checkValidUsername} = require("./loginHelpers");
 
 module.exports = {
+
+    checkValidFirstName: async (firstName) => {
+        if(!firstName){
+            throw { statusCode: 400, message: "First name field is mandatory" }
+        }
+    },
+
+    checkValidLastName: async (lastName) => {
+        if(!lastName){
+            throw { statusCode: 400, message: "First name field is mandatory" }
+        }
+    },
+
     editProfile: async (originalUserName, userName, firstName, lastName, location, bio) => {
         const db = await getDBConnection();
 
         if(!db){
             throw { statusCode: 400, message: "Internal Error occured...." };        
         }
+
+        await checkValidUsername(userName);
+        await module.exports.checkValidFirstName(firstName);
+        await module.exports.checkValidLastName(lastName);
 
         const editProfile = {
             $set: {
@@ -33,7 +51,7 @@ module.exports = {
             throw { statusCode: 400, message: editProfileCollection.err };
         }
 
-        if(editProfileCollection.ok === 0){
+        if(editUserCollection.ok === 0){
             throw { statusCode: 400, message: editUserCollection.err };
         }
 
