@@ -55,7 +55,7 @@ module.exports = {
             throw { statusCode: 400, message: editUserCollection.err };
         }
 
-        console.log("EDIT PROFILE VALUE ");
+        console.log("EDIT PROFILE VALUE");
         console.log(editProfileCollection.value);
 
         return editProfileCollection.value;
