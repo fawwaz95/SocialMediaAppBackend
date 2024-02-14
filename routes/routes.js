@@ -67,4 +67,14 @@ router.post("/editProfile", async (req, res) => {
   }
 })
 
+router.post("/fileUpload", async (req, res) => {
+  const file = req.body.file;
+  console.log("GOT FILE IN BACKEND ");
+  console.log(file);
+
+  return res.status(200).json("FILE UPLOAD THING");
+});
+
+
+
 module.exports = router;
