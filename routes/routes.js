@@ -2,9 +2,22 @@ const express = require("express");
 const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const router = express.Router();
+const multer = require('multer');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const { getUser, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile } = require("../helpers/profileHelpers");
+
+
+const {v2: cloudinary} = require("cloudinary");
+          
+cloudinary.config({ 
+  cloud_name: 'digzdsqjz', 
+  api_key: '349114513971677', 
+  api_secret: 'fPRkdAbwaVwtFhOb8VQUSabbDII' 
+});
 
 router.get("/getUsers", async (req, res) => {
   const db = await getDBConnection();
@@ -67,12 +80,44 @@ router.post("/editProfile", async (req, res) => {
   }
 })
 
-router.post("/fileUpload", async (req, res) => {
-  const file = req.body.file;
-  console.log("GOT FILE IN BACKEND ");
-  console.log(file);
+router.post("/fileUpload", upload.single('file'), async (req, res) => {
+  console.log("Uploaded file:", req.file);
 
-  return res.status(200).json("FILE UPLOAD THING");
+    req.file.email = "fawwaz_95@hotmail.com";
+
+    // Customize Cloudinary upload options
+    const uploadOptions = {
+      public_id: 'find_me',
+      original_filename: req.file.originalname,
+      //folder: 'custom_folder',
+    };
+
+  cloudinary.uploader.upload_stream(
+    //{ resource_type: 'auto' }, // Let Cloudinary detect the file type
+    uploadOptions,
+
+    (error, result) => {
+      if (error) {
+        console.error("Error uploading file to Cloudinary:", error);
+        return res.status(500).json({ error: 'Failed to upload file to Cloudinary' });
+      }
+      console.log("Upload result:", result);
+      res.status(200).json({ message: 'File uploaded successfully', cloudinaryResult: result });
+    }
+  ).end(req.file.buffer);
+
+
+
+  /*console.log("Uploaded file:", req.file);
+
+  cloudinary.uploader.upload("https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
+  { 
+    public_id: "uploaded",
+    original_filename: "the_original"
+  }, 
+  function(error, result) {console.log(result); });
+
+  res.status(200).json({ message: 'File uploaded successfully' });*/
 });
 
 
