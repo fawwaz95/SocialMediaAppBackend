@@ -81,7 +81,7 @@ router.post("/editProfile", async (req, res) => {
 })
 
 router.post("/fileUpload", upload.single('file'), async (req, res) => {
-  console.log("Uploaded file:", req.file);
+  console.log("Uploaded file: ", req.file);
 
     req.file.email = "fawwaz_95@hotmail.com";
 
