@@ -85,11 +85,10 @@ router.post("/fileUpload", upload.single('file'), async (req, res) => {
 
     req.file.email = "fawwaz_95@hotmail.com";
 
-    // Customize Cloudinary upload options
+    //Adjust cloudinary existing attributes within upload_stream object
     const uploadOptions = {
       public_id: 'find_me',
-      original_filename: req.file.originalname,
-      //folder: 'custom_folder',
+      folder: 'custom_folder',
     };
 
   cloudinary.uploader.upload_stream(
