@@ -82,17 +82,16 @@ router.post("/editProfile", async (req, res) => {
 
 router.post("/fileUpload", upload.single('file'), async (req, res) => {
   console.log("Uploaded file: ", req.file);
+  console.log("Uploaded email: ", req.body.email);
 
-    req.file.email = "fawwaz_95@hotmail.com";
-
-    //Adjust cloudinary existing attributes within upload_stream object
+    //Overwrite existing cloudinary.uploader.upload_stream object attributes
     const uploadOptions = {
-      public_id: 'find_me',
-      folder: 'custom_folder',
+      public_id: `req.body.email:${new Date().getMilliseconds()}`,  //Unique id for pictures 
+      overwritten: false,
+      folder: 'User_Uploads',     //Folder with all user uploads
     };
 
   cloudinary.uploader.upload_stream(
-    //{ resource_type: 'auto' }, // Let Cloudinary detect the file type
     uploadOptions,
 
     (error, result) => {
@@ -104,19 +103,31 @@ router.post("/fileUpload", upload.single('file'), async (req, res) => {
       res.status(200).json({ message: 'File uploaded successfully', cloudinaryResult: result });
     }
   ).end(req.file.buffer);
+});
 
 
+router.get("/getUserUploads", async (req, res) => {
+  const email = req.query.email;
 
-  /*console.log("Uploaded file:", req.file);
+  try {
+    const result = await cloudinary.search
+      .expression(`folder:User_Uploads AND filename:${email}`)
+      .execute();
 
-  cloudinary.uploader.upload("https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
-  { 
-    public_id: "uploaded",
-    original_filename: "the_original"
-  }, 
-  function(error, result) {console.log(result); });
+    if (result.resources.length === 0) {
+      return res.status(404).send("No uploads found for this user.");
+    }
 
-  res.status(200).json({ message: 'File uploaded successfully' });*/
+    const userUploads = {
+      url: result.resources[0].url,
+      upload_date: result.resources[0].uploaded_at
+    };
+
+    return res.status(200).send(userUploads);
+  } catch (error) {
+    console.error('Error fetching images:', error);
+    return res.status(500).send("An error occurred while fetching user uploads.");
+  }
 });
 
 
