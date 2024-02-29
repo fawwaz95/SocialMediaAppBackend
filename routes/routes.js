@@ -1,17 +1,17 @@
 const express = require("express");
-const getDBConnection = require("../db/conn.js");
-const data = require("../db/data.js");
-const router = express.Router();
 const multer = require('multer');
-
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const {v2: cloudinary} = require("cloudinary");
+const { v4: uuidv4 } = require('uuid');
 
+const getDBConnection = require("../db/conn.js");
+const data = require("../db/data.js");
 const { getUser, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile } = require("../helpers/profileHelpers");
+const router = express.Router();
 
 
-const {v2: cloudinary} = require("cloudinary");
           
 cloudinary.config({ 
   cloud_name: 'digzdsqjz', 
@@ -84,10 +84,11 @@ router.post("/fileUpload", upload.single('file'), async (req, res) => {
   console.log("Uploaded file: ", req.file);
   console.log("Uploaded email: ", req.body.email);
 
+  const uuid = uuidv4();
+
     //Overwrite existing cloudinary.uploader.upload_stream object attributes
     const uploadOptions = {
-      public_id: `req.body.email:${new Date().getMilliseconds()}`,  //Unique id for pictures 
-      overwritten: false,
+      public_id: `${req.body.email}-${uuid}`,  //Unique id for pictures
       folder: 'User_Uploads',     //Folder with all user uploads
     };
 
@@ -117,12 +118,21 @@ router.get("/getUserUploads", async (req, res) => {
       return res.status(404).send("No uploads found for this user.");
     }
 
-    const userUploads = {
-      url: result.resources[0].url,
-      upload_date: result.resources[0].uploaded_at
-    };
+    //console.log("FUll results...");
+    //console.log(result);
 
-    return res.status(200).send(userUploads);
+   const getAllUploads = result.resources.map(arrayItems => {
+      return {
+        url: arrayItems.url,
+        upload_date: arrayItems.uploaded_at
+      }
+    });
+
+    console.log("DO we have an array of uplaods?");
+    console.log(getAllUploads);
+
+
+    return res.status(200).send(getAllUploads);
   } catch (error) {
     console.error('Error fetching images:', error);
     return res.status(500).send("An error occurred while fetching user uploads.");
