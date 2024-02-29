@@ -93,7 +93,6 @@ router.post("/fileUpload", upload.single('file'), async (req, res) => {
 
   cloudinary.uploader.upload_stream(
     uploadOptions,
-
     (error, result) => {
       if (error) {
         console.error("Error uploading file to Cloudinary:", error);
