@@ -115,11 +115,8 @@ router.get("/getUserUploads", async (req, res) => {
       .execute();
 
     if (result.resources.length === 0) {
-      return res.status(404).send("No uploads found for this user.");
+      return res.status(200).send({message:"No Posts Yet"});
     }
-
-    //console.log("FUll results...");
-    //console.log(result);
 
    const getAllUploads = result.resources.map(arrayItems => {
       return {
