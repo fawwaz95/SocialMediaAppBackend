@@ -106,7 +106,7 @@ router.post("/fileUpload", upload.single('file'), async (req, res) => {
 });
 
 
-router.get("/getUserUploads", async (req, res) => {
+router.get("/getAllUserUploads", async (req, res) => {
   const email = req.query.email;
 
   try {
@@ -125,10 +125,30 @@ router.get("/getUserUploads", async (req, res) => {
       }
     });
 
-    console.log("DO we have an array of uplaods?");
-    console.log(getAllUploads);
+    return res.status(200).send(getAllUploads);
+  } catch (error) {
+    console.error('Error fetching images:', error);
+    return res.status(500).send("An error occurred while fetching user uploads.");
+  }
+});
 
+router.get("/getUserUpload", async (req, res) => {
+  const postId = req.query.publicId;
+  try {
+    const result = await cloudinary.search
+      .expression(`User_Uploads AND public_id=${postId}`)
+      .execute();
 
+    if (result.resources.length === 0) {
+      return res.status(404).send({message:"Can't find users post with the following postId"});
+    }
+
+   const getAllUploads = result.resources.map(arrayItems => {
+      return {
+        url: arrayItems.url,
+      }
+    });
+    
     return res.status(200).send(getAllUploads);
   } catch (error) {
     console.error('Error fetching images:', error);
