@@ -140,7 +140,7 @@ router.get("/getUserUpload", async (req, res) => {
       .execute();
 
     if (result.resources.length === 0) {
-      return res.status(404).send({message:"Can't find users post with the following postId"});
+      return res.status(404).send({message:"Can't find users post with the following postId "});
     }
 
    const getAllUploads = result.resources.map(arrayItems => {
@@ -148,7 +148,7 @@ router.get("/getUserUpload", async (req, res) => {
         url: arrayItems.url,
       }
     });
-    
+
     return res.status(200).send(getAllUploads);
   } catch (error) {
     console.error('Error fetching images:', error);
