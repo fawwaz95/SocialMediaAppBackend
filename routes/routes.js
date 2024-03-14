@@ -151,7 +151,7 @@ router.get("/getUserUpload", async (req, res) => {
 
     return res.status(200).send(getAllUploads);
   } catch (error) {
-    console.error('Error fetching images:', error);
+    console.error('Error fetching images: ', error);
     return res.status(500).send("An error occurred while fetching user uploads.");
   }
 });
