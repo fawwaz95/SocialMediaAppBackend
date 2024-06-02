@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
-const { getUser, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
+const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile } = require("../helpers/profileHelpers");
 const router = express.Router();
 
@@ -143,7 +143,7 @@ router.get("/getUserUpload", async (req, res) => {
       return res.status(404).send({message:"Can't find users post with the following postId "});
     }
 
-   const getAllUploads = result.resources.map(arrayItems => {
+   const getAllUploads = await result.resources.map(arrayItems => {
       return {
         url: arrayItems.url,
       }
@@ -156,6 +156,53 @@ router.get("/getUserUpload", async (req, res) => {
   }
 });
 
+router.get("/getNewsfeed", async (req, res) => {
+  console.log("Calling getNewsfeed route..........");
+
+  try {
+    console.log("Try calling User_Uploads..........");
+    const result = await cloudinary.search
+                  .expression(`User_Uploads`)
+                  .execute();
+
+    if(result.resources.length === 0){
+      return res.status(404).send({message:"Unable to fetch Newsfeed"});
+    }
+
+    console.log("Entire newsfeed obj:");
+    console.log(result);
+
+    const newsfeedData = await Promise.all(result.resources.map(async (item) => {
+      try {
+        const userInfo = await getUserProfileByEmail(item.filename.split("-")[0]);
+        const {userName, location} = userInfo;
+        return {
+          userName,
+          location,
+          uploadDate: item.uploaded_at,
+          url: item.url,
+        };
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+        // Handle error fetching user info here
+        return {
+          userInfo: null, // or any default value
+          uploadDate: item.uploaded_at,
+          url: item.url,
+        };
+      }
+    }));
+
+    console.log("Check if userInfo is here now....");
+    console.log(newsfeedData);
+
+    return res.status(200).send(newsfeedData);
+
+  } catch (error) {
+    console.error('Error fetching Newsfeed: ', error); 
+    return res.status(500).send("An error occurred while fetching Newsfeed.");
+  }
+});
 
 
 module.exports = router;

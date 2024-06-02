@@ -64,6 +64,21 @@ module.exports = {
         return { success: true, ...getProfile }
     },
 
+    getUserProfileByEmail: async (email) => {
+        const db = await getDBConnection();
+        const getProfile = await db.collection("profile").findOne({ email: email  });
+
+        if (!db) {
+            throw { statusCode: 400, message: "Internal Error occured...." };
+        }
+
+        if (!getProfile) {
+            throw { statusCode: 400, message: `User profile doesn't exist ${email}` }
+        }
+
+        return { success: true, ...getProfile }
+    },
+
     createProfile: async (firstName, lastName, userName, email) => {
         if (!firstName || !lastName || !userName || !email) {
             throw { statusCode: 400, message: "All fields are required." };
