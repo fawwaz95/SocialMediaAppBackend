@@ -31,9 +31,9 @@ module.exports = {
         const db = await getDBConnection();
         const user = await db.collection('users').findOne({ userName: username });
     
-        if (!user) {
+       /* if (!user) {
             throw { statusCode: 400, message: "Username not found." };
-        }
+        }*/
     
         return { success: true, ...user };
     },

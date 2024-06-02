@@ -43,7 +43,7 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
-    await data();
+    //await data();
     const { firstName, lastName, userName, email, password } = req.body;
     
     await registerUser(firstName, lastName, userName, email, password);
@@ -184,9 +184,8 @@ router.get("/getNewsfeed", async (req, res) => {
         };
       } catch (error) {
         console.error("Error fetching user info:", error);
-        // Handle error fetching user info here
         return {
-          userInfo: null, // or any default value
+          userInfo: null,
           uploadDate: item.uploaded_at,
           url: item.url,
         };
