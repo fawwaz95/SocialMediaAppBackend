@@ -111,7 +111,7 @@ router.get("/getAllUserUploads", async (req, res) => {
 
   try {
     const result = await cloudinary.search
-      .expression(`folder:User_Uploads AND filename:${email}`)
+      .expression(`folder:User_Uploads AND filename: ${email}`)
       .execute();
 
     if (result.resources.length === 0) {
