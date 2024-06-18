@@ -96,7 +96,7 @@ router.post("/fileUpload", upload.single('file'), async (req, res) => {
     uploadOptions,
     (error, result) => {
       if (error) {
-        console.error("Error uploading file to Cloudinary:", error);
+        console.error("Error uploading file to Cloudinary: ", error);
         return res.status(500).json({ error: 'Failed to upload file to Cloudinary' });
       }
       console.log("Upload result:", result);
