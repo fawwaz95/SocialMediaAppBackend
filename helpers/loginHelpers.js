@@ -27,13 +27,12 @@ module.exports = {
     },
 
     getUser: async (username) => {
-        console.log("getUser function....");
         const db = await getDBConnection();
         const user = await db.collection('users').findOne({ userName: username });
     
-       /* if (!user) {
-            throw { statusCode: 400, message: "Username not found." };
-        }*/
+        if (!db) {
+            throw { statusCode: 400, message: "Internal Error occured...." };
+        }
     
         return { success: true, ...user };
     },

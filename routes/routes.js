@@ -111,21 +111,23 @@ router.get("/getAllUserUploads", async (req, res) => {
 
   try {
     const result = await cloudinary.search
-      .expression(`folder:User_Uploads AND filename: ${email}`)
+      .expression(`folder:User_Uploads`)
+      //.expression(`folder:User_Uploads AND filename: ${email}`)
       .execute();
 
     if (result.resources.length === 0) {
       return res.status(200).send({message:"No Posts Yet...."});
     }
 
-   const getAllUploads = result.resources.map(arrayItems => {
-      return {
-        url: arrayItems.url,
-        upload_date: arrayItems.uploaded_at
-      }
-    });
+    const getUserUploads = await result.resources
+        .filter(arrayItems => arrayItems.filename.includes(email))
+        .map(arrayItems => ({
+            url: arrayItems.url,
+            upload_date: arrayItems.uploaded_at
+        }));
+        
+    return res.status(200).send(getUserUploads);
 
-    return res.status(200).send(getAllUploads);
   } catch (error) {
     console.error('Error fetching images:', error);
     return res.status(500).send("An error occurred while fetching user uploads. ");
