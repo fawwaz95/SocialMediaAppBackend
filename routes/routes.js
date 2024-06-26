@@ -31,7 +31,7 @@ router.post("/login", async (req, res) => {
     const { userName, password } = req.body;
     const login = await loginUser(userName, password);
 
-    console.log("User profile.....");
+    console.log("User profile......");
     console.log(login);
 
     res.status(200).json(login)
