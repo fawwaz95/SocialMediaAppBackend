@@ -9,6 +9,7 @@ const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile } = require("../helpers/profileHelpers");
+const { addFriendHelper } = require("../helpers/generalHelpers");
 const router = express.Router();
 
 
@@ -204,6 +205,26 @@ router.get("/getNewsfeed", async (req, res) => {
     return res.status(500).send("An error occurred while fetching Newsfeed.");
   }
 });
+
+router.post("/followFriend", async (req, res) => {
+  console.log("Calling followFriend route..........");
+  console.log(req.body);
+
+  try{
+    const addFriendToProfile = {
+      userName: req.body.userName,
+      friendUserName: req.body.friendUserName,
+    } 
+  
+    const addFriend = addFriendHelper(addFriendToProfile);
+  
+    return res.status(200).send(addFriend);
+  }catch(error){
+    console.error('Error in followFriend: ', error); 
+    return res.status(500).send("Unable to add Friend");
+  }
+
+})
 
 
 module.exports = router;
