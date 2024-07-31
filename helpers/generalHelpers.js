@@ -2,7 +2,7 @@ const getDBConnection = require("../db/conn.js");
 
 module.exports = {
     addFriendHelper: async (friendObj) => {
-        console.log("addFriendHelper");
+        console.log("addFriendHelper:");
         console.log(friendObj);
 
         // Validate input
