@@ -9,7 +9,7 @@ const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile } = require("../helpers/profileHelpers");
-const { addFriendHelper } = require("../helpers/generalHelpers");
+const { addFriendHelper, getFollowingHelper } = require("../helpers/generalHelpers");
 const router = express.Router();
 
 
@@ -224,6 +224,22 @@ router.post("/followFriend", async (req, res) => {
     return res.status(500).send("Unable to add Friend");
   }
 
+})
+
+router.get("/getFollowing", async (req, res) =>{
+  console.log("Calling getFollowing route..........");
+  console.log(req.query);
+  try{
+    const getAllFollowing = await getFollowingHelper(req.query.user_id);
+
+    console.log("getAllFollowing result.......");
+    console.log(getAllFollowing); 
+
+    return res.status(200).send(getAllFollowing);
+  }catch(error){
+    console.error('Error in getFollowing: ', error);
+    return res.status(500).send("Unable to get Following");
+  }
 })
 
 

@@ -49,5 +49,26 @@ module.exports = {
             console.log(error);
             return { success: false, message: "Error checking existing friend", error: error };
         }
+    },
+
+    getFollowingHelper: async (userName) => {
+        console.log("getFollowingHelper");
+
+        try{
+            const db = await getDBConnection();
+            const result = await db.collection("following").find({user_id: userName}).toArray();
+            const totalFollowing = result.map(items => items.friend_id);
+            console.log("All Following");
+            console.log(totalFollowing);
+
+            if(result.length > 0){
+                return { success: "Found all following users", totalFollowing};
+            }else{
+                return { success: false, message: "No following users found" };
+            }
+        }catch(error){
+            console.log(error);
+            return { success: false, message: "Error fetching following", error: error };
+        }
     }
 }
