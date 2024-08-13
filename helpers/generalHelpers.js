@@ -39,7 +39,7 @@ module.exports = {
             });
 
             if (result) {
-                console.log("Found matching record... don't insert into table");
+                console.log("Found matching record... don't insert into table ");
                 return { success: false, message: "Friend already exists" };
             } else {
                 console.log("No matching record found... insert into table");
