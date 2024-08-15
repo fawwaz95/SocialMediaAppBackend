@@ -3,9 +3,8 @@ const getDBConnection = require("../db/conn.js");
 module.exports = {
     addFriendHelper: async (friendObj) => {
         console.log("addFriendHelper: ");
-        console.log(friendObj);
+        //console.log(friendObj);
 
-        // Validate input
         if (!friendObj || !friendObj.userName || !friendObj.friendUserName) {
             throw { success: false, message: "Invalid input: userName and friendUserName are required" };
         }
@@ -14,7 +13,8 @@ module.exports = {
             const doesFriendExist = await module.exports.existingFriend(friendObj);
 
             if (doesFriendExist.success === false) {
-                throw { success: doesFriendExist.success, message: doesFriendExist.message };
+                console.log(doesFriendExist.message);
+                //throw { success: doesFriendExist.success, message: doesFriendExist.message };
             }
 
             const db = await getDBConnection();
@@ -30,13 +30,20 @@ module.exports = {
     },
 
     existingFriend: async (friendObj) => {
-        console.log("existingFriend");
         try {
             const db = await getDBConnection();
+
+            if(friendObj.userName === friendObj.friendUserName){
+                return { success: false, message: "Can't add self as a friend"};
+            }
+
             const result = await db.collection("following").findOne({
                 user_id: friendObj.userName,
                 friend_id: friendObj.friendUserName
             });
+
+            console.log("RESULT");
+            console.log(result);
 
             if (result) {
                 console.log("Found matching record... don't insert into table ");
