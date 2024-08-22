@@ -6,7 +6,7 @@ module.exports = {
         //console.log(friendObj);
 
         if (!friendObj || !friendObj.userName || !friendObj.friendUserName) {
-            throw { success: false, message: "Invalid input: userName and friendUserName are required" };
+            throw { success: false, message: "Invalid input: userName and friendUserName are required " };
         }
 
         try {
