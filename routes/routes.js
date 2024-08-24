@@ -230,12 +230,12 @@ router.get("/getFollowing", async (req, res) =>{
   console.log("Calling getFollowing route..........");
   console.log(req.query);
   try{
-    const getAllFollowing = await getFollowingHelper(req.query.user_id);
+    const getTotalFollowingFollowers = await getFollowingHelper(req.query.user_id);
 
-    console.log("getAllFollowing result.......");
-    console.log(getAllFollowing); 
+    console.log("getAllFollowingFollowers result.......");
+    console.log(getTotalFollowingFollowers); 
 
-    return res.status(200).send(getAllFollowing);
+    return res.status(200).send(getTotalFollowingFollowers);
   }catch(error){
     console.error('Error in getFollowing: ', error);
     return res.status(500).send("Unable to get Following");

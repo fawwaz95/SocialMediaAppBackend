@@ -63,15 +63,28 @@ module.exports = {
 
         try{
             const db = await getDBConnection();
-            const result = await db.collection("following").find({user_id: userName}).toArray();
-            const totalFollowing = result.map(items => items.friend_id);
-            console.log("All Following");
-            console.log(totalFollowing);
+            const followingResult = await db.collection("following").find({user_id: userName}).toArray();
+            const numberOfFollowing = followingResult.length;
+            //const totalFollowing = followingResult.map(items => items.friend_id);
 
-            if(result.length > 0){
-                return { success: "Found all following users", totalFollowing};
+            const followersResult = await db.collection("following").find({friend_id: userName}).toArray();
+            const numberOfFollowers = followersResult.length;
+            //const totalFollowers = followersResult.map(items => items.friend_id.length);
+            console.log("Number of Following");
+            console.log(numberOfFollowing);
+
+            console.log("Number of Followers");
+            console.log(numberOfFollowers);
+
+            const followingFollowersData = {
+                numberOfFollowing: numberOfFollowing,
+                numberOfFollowers: numberOfFollowers
+            };
+
+            if(followingResult.length > 0 || followersResult.length > 0){
+                return { success: "Found all following and followers", followingFollowersData};
             }else{
-                return { success: false, message: "No following users found" };
+                return { success: false, message: "No following and followers found" };
             }
         }catch(error){
             console.log(error);
