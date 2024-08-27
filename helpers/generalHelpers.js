@@ -70,7 +70,7 @@ module.exports = {
             const followersResult = await db.collection("following").find({friend_id: userName}).toArray();
             const numberOfFollowers = followersResult.length;
             //const totalFollowers = followersResult.map(items => items.friend_id.length);
-            console.log("Number of Following");
+            console.log("Number of Following ");
             console.log(numberOfFollowing);
 
             console.log("Number of Followers");
