@@ -54,7 +54,7 @@ module.exports = {
             }
         } catch (error) {
             console.log(error);
-            return { success: false, message: "Error checking existing friend", error: error };
+            return { success: false, message: "Error checking existing friend" , error: error };
         }
     },
 

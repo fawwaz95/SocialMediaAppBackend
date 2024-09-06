@@ -202,7 +202,7 @@ router.get("/getNewsfeed", async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching Newsfeed: ', error); 
-    return res.status(500).send("An error occurred while fetching Newsfeed.");
+    return res.status(500).send("An error occurred while fetching Newsfeed. ");
   }
 });
 
