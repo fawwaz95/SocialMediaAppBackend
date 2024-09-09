@@ -207,7 +207,7 @@ router.get("/getNewsfeed", async (req, res) => {
 });
 
 router.post("/followFriend", async (req, res) => {
-  console.log("Calling followFriend route..........");
+  console.log("Calling followFriend route.........");
   //console.log(req.body);
 
   try{
