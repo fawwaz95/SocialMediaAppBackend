@@ -4,7 +4,7 @@ const data = async () => {
     try {
       const db = await getDBConnection();
       const usersCollection = await db.collection("users");
-      const profileCollection = await db.collection("profile");
+     // const profileCollection = await db.collection("profile");
       const userRecords = [
         {
           _id: "USER0001",
