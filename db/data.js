@@ -11,7 +11,7 @@ const data = async () => {
           firstName: "John",
           lastName: "Doe",
           userName: "JohnDoe",
-          email: "fawwaz.ahmad@zcomsystems.com",
+          //email: "fawwaz.ahmad@zcomsystems.com",
           password: "password"
         },
       ];
