@@ -8,7 +8,7 @@ const data = async () => {
       const userRecords = [
         {
           _id: "USER0001",
-          firstName: "John",
+         // firstName: "John",
           lastName: "Doe",
           userName: "JohnDoe",
           email: "fawwaz.ahmad@zcomsystems.com",
