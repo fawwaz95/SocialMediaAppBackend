@@ -7,7 +7,7 @@ const data = async () => {
      // const profileCollection = await db.collection("profile");
       const userRecords = [
         {
-          _id: "USER0001",
+          //_id: "USER0001",
          // firstName: "John",
           lastName: "Doe",
           userName: "JohnDoe",
