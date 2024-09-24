@@ -63,25 +63,29 @@ module.exports = {
 
         try{
             const db = await getDBConnection();
-            const followingResult = await db.collection("following").find({user_id: userName}).toArray();
-            const numberOfFollowing = followingResult.length;
-            //const totalFollowing = followingResult.map(items => items.friend_id);
+            //toArray returns a promise so must await and wait for the response in order to .map it directly
+            const followingUsernames = (await db.collection("following").find({ user_id: userName }).toArray())
+                                        .map(items => items.friend_id);
+            const followersUsernames = (await db.collection("following").find({friend_id: userName}).toArray())
+                                        .map(items => items.user_id);
 
-            const followersResult = await db.collection("following").find({friend_id: userName}).toArray();
-            const numberOfFollowers = followersResult.length;
-            //const totalFollowers = followersResult.map(items => items.friend_id.length);
-            console.log("Number of Following");
-            console.log(numberOfFollowing);
+            console.log("Following user ids");
+            console.log(followingUsernames);
 
-            console.log("Number of Followers");
-            console.log(numberOfFollowers);
+            console.log("Followers user ids");
+            console.log(followersUsernames);
 
-            const followingFollowersData = {
+            /*const followingFollowersData = {
                 numberOfFollowing: numberOfFollowing,
                 numberOfFollowers: numberOfFollowers
+            };*/
+
+            const followingFollowersData = {
+                following: followingUsernames,
+                followers: followersUsernames
             };
 
-            if(followingResult.length > 0 || followersResult.length > 0){
+            if(followingUsernames.length > 0 || followersUsernames.length > 0){
                 return { success: "Found all following and followers", followingFollowersData};
             }else{
                 return { success: false, message: "No following and followers found" };
