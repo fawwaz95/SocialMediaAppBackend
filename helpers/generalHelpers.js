@@ -58,8 +58,8 @@ module.exports = {
         }
     },
 
-    getFollowingHelper: async (userName) => {
-        console.log("getFollowingHelper");
+    getFollowingFollowersHelper: async (userName) => {
+        console.log("getFollowingFollowersHelper");
 
         try{
             const db = await getDBConnection();
@@ -74,11 +74,6 @@ module.exports = {
 
             console.log("Followers user ids");
             console.log(followersUsernames);
-
-            /*const followingFollowersData = {
-                numberOfFollowing: numberOfFollowing,
-                numberOfFollowers: numberOfFollowers
-            };*/
 
             const followingFollowersData = {
                 following: followingUsernames,

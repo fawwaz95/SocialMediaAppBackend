@@ -9,7 +9,7 @@ const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile } = require("../helpers/profileHelpers");
-const { addFriendHelper, getFollowingHelper } = require("../helpers/generalHelpers");
+const { addFriendHelper, getFollowingFollowersHelper } = require("../helpers/generalHelpers");
 const router = express.Router();
 
 
@@ -226,11 +226,11 @@ router.post("/followFriend", async (req, res) => {
 
 })
 
-router.get("/getFollowing", async (req, res) =>{
+router.get("/getFollowingFollowers", async (req, res) =>{
   console.log("Calling getFollowing route..........");
   console.log(req.query);
   try{
-    const getFollowingAndFollowers = await getFollowingHelper(req.query.user_id);
+    const getFollowingAndFollowers = await getFollowingFollowersHelper(req.query.user_id);
 
     console.log("getFollowingAndFollowers result.......");
     console.log(getFollowingAndFollowers); 
