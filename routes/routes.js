@@ -9,7 +9,7 @@ const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile } = require("../helpers/profileHelpers");
-const { addFriendHelper, getFollowingFollowersHelper } = require("../helpers/generalHelpers");
+const { addFriendHelper, getFollowingFollowersHelper, unFollowUserHelper } = require("../helpers/generalHelpers");
 const router = express.Router();
 
 
@@ -238,7 +238,20 @@ router.get("/getFollowingFollowers", async (req, res) =>{
     return res.status(200).send(getFollowingAndFollowers);
   }catch(error){
     console.error('Error in getFollowing: ', error);
-    return res.status(500).send("Unable to get Following");
+    return res.status(500).send("Unable to get Following or Followers users");
+  }
+})
+
+router.delete("/unFollowUser", async(req, res) => {
+  console.log("Calling unFollowUser route..........");
+  console.log(req.query);
+  try{
+    const unfollowUser = await unFollowUserHelper(req.query.user_id, req.query.friend_id);
+    return res.status(200).send(unfollowUser);
+
+  }catch(error){
+    console.error('Error in unFollowUser: ', error);
+    return res.status(500).send("Unable to unFollow user");
   }
 })
 

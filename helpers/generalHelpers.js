@@ -89,5 +89,26 @@ module.exports = {
             console.log(error);
             return { success: false, message: "Error fetching following", error: error };
         }
+    },
+
+    unFollowUserHelper: async(userId, unfollowUserId) => {
+        console.log("unFollowUserHelper");
+        console.log(" userId " + userId + " unfollowUserId " + unfollowUserId);
+        try{
+            const db = await getDBConnection();
+            const deleteRecord = await db.collection("following").deleteOne({
+                user_id: userId,
+                friend_id: unfollowUserId
+            });
+
+            if (deleteRecord.deletedCount === 1) {
+                return { success: true, message: `Successfully removed user ${unfollowUserId} from account ${userId}`};
+            } else {
+                return { success: false, message: `Failed to remove user ${unfollowUserId}` };
+            }
+        }catch(error){
+            console.log(error);
+            return { success: false, message: "Error in unFollowUserHelper", error: error };
+        }
     }
 }
