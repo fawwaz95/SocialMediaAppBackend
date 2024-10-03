@@ -102,7 +102,13 @@ module.exports = {
             });
 
             if (deleteRecord.deletedCount === 1) {
-                return { success: true, message: `Successfully removed user ${unfollowUserId} from account ${userId}`};
+                
+                const unFollowResult = {
+                    message: `Successfully removed user ${unfollowUserId} from account ${userId}`,
+                    unFollowed: unfollowUserId,
+                };
+
+                return { success: true, ...unFollowResult};
             } else {
                 return { success: false, message: `Failed to remove user ${unfollowUserId}` };
             }

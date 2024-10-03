@@ -246,8 +246,8 @@ router.delete("/unFollowUser", async(req, res) => {
   console.log("Calling unFollowUser route..........");
   console.log(req.query);
   try{
-    const unfollowUser = await unFollowUserHelper(req.query.user_id, req.query.friend_id);
-    return res.status(200).send(unfollowUser);
+    const unfollowUserRes = await unFollowUserHelper(req.query.user_id, req.query.friend_id);
+    return res.status(200).send(unfollowUserRes);
 
   }catch(error){
     console.error('Error in unFollowUser: ', error);
