@@ -3,7 +3,6 @@ const getDBConnection = require("../db/conn.js");
 module.exports = {
     addFriendHelper: async (friendObj) => {
         console.log("addFriendHelper: ");
-        //console.log(friendObj);
 
         if (!friendObj || !friendObj.userName || !friendObj.friendUserName) {
             throw { success: false, message: "Invalid input: userName and friendUserName are required " };
@@ -14,7 +13,7 @@ module.exports = {
 
             if (doesFriendExist.success === false) {
                 console.log(doesFriendExist.message);
-                //throw { success: doesFriendExist.success, message: doesFriendExist.message };
+                return { success: doesFriendExist.success, message: doesFriendExist.message };
             }
 
             const db = await getDBConnection();
@@ -102,7 +101,7 @@ module.exports = {
             });
 
             if (deleteRecord.deletedCount === 1) {
-                
+
                 const unFollowResult = {
                     message: `Successfully removed user ${unfollowUserId} from account ${userId}`,
                     unFollowed: unfollowUserId,
