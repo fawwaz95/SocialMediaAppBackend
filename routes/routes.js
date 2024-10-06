@@ -9,7 +9,8 @@ const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile } = require("../helpers/profileHelpers");
-const { addFriendHelper, getFollowingFollowersHelper, unFollowUserHelper } = require("../helpers/generalHelpers");
+const { addFriendHelper, getFollowingFollowersHelper, unFollowUserHelper, removeFollowerHelper } = require("../helpers/generalHelpers");
+const { ReturnDocument } = require("mongodb");
 const router = express.Router();
 
 
@@ -251,7 +252,18 @@ router.delete("/unFollowUser", async(req, res) => {
 
   }catch(error){
     console.error('Error in unFollowUser: ', error);
-    return res.status(500).send("Unable to unFollow user");
+    return res.status(500).send("Unable to unFollow user.....");
+  }
+})
+
+router.delete("/removeFollower", async(req, res) => {
+  console.log("Calling removeFollower route..........");
+  console.log(req.query);
+  try{
+    const removeFollower = await removeFollowerHelper(req.query.user_id, req.query.friend_id);
+    return res.status(200).send(removeFollower);
+  }catch(error){
+    return res.status(500).send("Unable to Remove Follower....")
   }
 })
 

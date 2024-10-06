@@ -115,5 +115,32 @@ module.exports = {
             console.log(error);
             return { success: false, message: "Error in unFollowUserHelper", error: error };
         }
+    },
+
+    removeFollowerHelper: async(userAccount, removeUser) => {
+        console.log("removeFollower");
+
+        try{
+            const db = await getDBConnection();
+            const deleteRecord = await db.collection("following").deleteOne({user_id: removeUser, friend_id: userAccount});
+
+            console.log("deleteRecord");
+            console.log(deleteRecord);
+
+            if (deleteRecord.deletedCount === 1) {
+
+                const removeResult = {
+                    message: `Successfully removed user ${removeUser} from account ${userAccount}`,
+                    removedUser: removeUser,
+                };
+
+                return{success: true, ...removeResult}
+            }else{
+                return { success: false, message: `Failed to remove follower ${removeUser}` };
+            }
+        }catch(error){
+            console.log(error);
+            return { success: false, message: "Error in removeFollower", error: error };
+        }
     }
 }
