@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
-const { editProfile } = require("../helpers/profileHelpers");
+const { editProfile, getProfileInfo} = require("../helpers/profileHelpers");
 const { addFriendHelper, getFollowingFollowersHelper, unFollowUserHelper, removeFollowerHelper } = require("../helpers/generalHelpers");
 const { ReturnDocument } = require("mongodb");
 const router = express.Router();
@@ -75,6 +75,25 @@ router.post("/editProfile", async (req, res) => {
     console.log(editUserProfile);
 
     return res.status(200).json(editUserProfile);
+
+  }catch(error){
+    console.error(error.statusCode + " " + error.message);
+    res.status(error.status || 500).json({ success: false, message: error.message });
+  }
+})
+
+router.get("/getProfileInfo", async (req, res) => {
+  try{ 
+    const {userName} = req.query;
+    console.log("userName from fornt end");    
+    console.log(userName); 
+    
+
+    const profileInfo = await getProfileInfo(userName);
+    console.log("profileInfo end........");
+    console.log(profileInfo);
+
+    return res.status(200).json(profileInfo);
 
   }catch(error){
     console.error(error.statusCode + " " + error.message);

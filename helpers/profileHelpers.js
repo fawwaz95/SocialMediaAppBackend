@@ -59,6 +59,30 @@ module.exports = {
         console.log(editProfileCollection.value);
 
         return editProfileCollection.value;
+    },
+
+    getProfileInfo: async (username) => {
+        console.log("getProfileInfo route function");
+        console.log("Username to searh profile table....." + username);
+
+        const db = await getDBConnection();
+
+        if(!db){
+            throw { statusCode: 400, message: "Internal Error occured...." };        
+        }
+
+        if(!username){
+            throw { statusCode: 400, message: "Username is required..." };
+        }
+
+
+        const profileData = await db.collection("profile").findOne({userName: username}, { returnDocument: 'after' });
+
+        console.log("After invoking table!!!!");
+        console.log(profileData);
+
+        return profileData;
+
     }
 }
 
