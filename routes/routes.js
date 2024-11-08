@@ -137,7 +137,7 @@ router.get("/getAllUserUploads", async (req, res) => {
       .execute();
 
     if (result.resources.length === 0) {
-      return res.status(200).send({message:"No Posts Yet...."});
+      return res.status(200).send({message:"No Posts Yet../.."});
     }
 
     const getUserUploads = await result.resources
