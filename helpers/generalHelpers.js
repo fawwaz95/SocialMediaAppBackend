@@ -142,5 +142,30 @@ module.exports = {
             console.log(error);
             return { success: false, message: "Error in removeFollower", error: error };
         }
+    },
+
+    userLikedPost: async(url, likedBy) => {
+        console.log("userLikedPost");
+        try {
+            const db = await getDBConnection();
+            const updatedPost = await db.collection("likedPost").findOneAndUpdate(
+                { url: url }, // Query: Find the record with the matching URL
+                { $addToSet: { likes: likedBy } }, // Update: Add `likedBy` to the `likes` array if it's not already present
+                { new: true, upsert: true } // Options: `new: true` returns the updated document; `upsert: true` creates a new document if it doesn't exist
+            );
+
+            const response = {
+                success: true,
+                data: {
+                    url: updatedPost.value.url,
+                    likes: updatedPost.value.likes,
+                },
+            };
+
+            return { success: response.success, ...response };
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: "Failed to interact with post" };
+        }
     }
 }

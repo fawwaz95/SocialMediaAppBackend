@@ -9,7 +9,7 @@ const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile, getProfileInfo} = require("../helpers/profileHelpers");
-const { addFriendHelper, getFollowingFollowersHelper, unFollowUserHelper, removeFollowerHelper } = require("../helpers/generalHelpers");
+const { addFriendHelper, getFollowingFollowersHelper, unFollowUserHelper, removeFollowerHelper, userLikedPost } = require("../helpers/generalHelpers");
 const { ReturnDocument } = require("mongodb");
 const router = express.Router();
 
@@ -225,6 +225,32 @@ router.get("/getNewsfeed", async (req, res) => {
     return res.status(500).send("An error occurred while fetching Newsfeed. ");
   }
 });
+
+router.post("/likedPost", async (req, res) => {
+  console.log("Calling likedPost route..........");
+  console.log(req.body);
+  try{
+    const likedPost = {
+           url: req.body.likedPost.url, 
+           likedBy: req.body.likedPost.likedBy
+     };
+    
+    console.log("url:", likedPost.url);
+    console.log("Liked by:", likedPost.likedBy);
+
+    const addLikeToPost = await userLikedPost(likedPost.url, likedPost.likedBy);
+
+    console.log("Returning addLikeToPost:");
+    console.log(addLikeToPost);
+
+    return res.status(200).send(addLikeToPost);
+
+  }catch(error){
+    console.error('Error in likedPost route: ', error); 
+    return res.status(500).send("Unable to like the post");
+  }
+
+})
 
 router.post("/followFriend", async (req, res) => {
   console.log("Calling followFriend route.........");
