@@ -167,5 +167,29 @@ module.exports = {
             console.error(error);
             return { success: false, message: "Failed to interact with post" };
         }
+    },
+
+    getLikedPosts: async(req, res) => {
+        try{ 
+            const db = await getDBConnection();
+            const likedPosts = await db.collection("likedPost").find().toArray();
+
+            if(likedPosts.length <= 0){
+                return { success: false, message: "Didn't find any liked posts...."}
+            }
+
+            console.log("Retreived all liked posts " + likedPosts);
+
+            const response = {
+                success: true,
+                data: likedPosts,
+            };
+
+            return { success: response.success, response }
+
+        }catch(error){
+            console.error(error);
+            return { success: false, message: "Error in getLikedPosts"};
+        }
     }
 }
