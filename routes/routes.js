@@ -9,7 +9,7 @@ const getDBConnection = require("../db/conn.js");
 const data = require("../db/data.js");
 const { getUser, getUserProfileByEmail, getUserProfile, createProfile, registerUser, loginUser } = require("../helpers/loginHelpers");
 const { editProfile, getProfileInfo} = require("../helpers/profileHelpers");
-const { addFriendHelper, getFollowingFollowersHelper, unFollowUserHelper, removeFollowerHelper, userLikedPost, getLikedPosts } = require("../helpers/generalHelpers");
+const { addFriendHelper, getFollowingFollowersHelper, unFollowUserHelper, removeFollowerHelper, userLikedPost, getLikedPosts, unLikePost } = require("../helpers/generalHelpers");
 const { ReturnDocument } = require("mongodb");
 const router = express.Router();
 
@@ -260,6 +260,19 @@ router.get("/getLikedPosts", async (req, res) => {
   }catch(error){
     console.error('Error in getLikedPosts route: ', error);
   }
+});
+
+router.delete("/unLikePost", async (req, res) => {
+  console.log("Calling unLikePost route..........");
+  const {url, userName} = req.query;
+
+  console.log("The url " + url);
+  console.log("The userName " + userName);
+
+  const removeLike = await unLikePost(url, userName);
+
+  res.status(200).send(removeLike);
+  
 })
 
 router.post("/followFriend", async (req, res) => {

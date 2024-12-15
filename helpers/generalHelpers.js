@@ -150,7 +150,7 @@ module.exports = {
             const db = await getDBConnection();
             const updatedPost = await db.collection("likedPost").findOneAndUpdate(
                 { url: url }, // Query: Find the record with the matching URL
-                { $addToSet: { likes: likedBy } }, // Update: Add `likedBy` to the `likes` array if it's not already present
+                { $addToSet: { likes: likedBy } }, // Update: Add `likedBy` to the `likes` array if user is not already present
                 { new: true, upsert: true } // Options: `new: true` returns the updated document; `upsert: true` creates a new document if it doesn't exist
             );
 
@@ -166,6 +166,31 @@ module.exports = {
         } catch (error) {
             console.error(error);
             return { success: false, message: "Failed to interact with post" };
+        }
+    },
+
+    unLikePost: async(url, userName) => {
+        console.log("unLikePost....");
+        console.log(url);
+
+        try{
+            const db = await getDBConnection();
+            const result = await db.collection("likedPost").updateOne(
+                { url: url },
+                { $pull: { likes: userName } } // Remove the username from likes array using mongodb $pull
+            );
+            
+            if (result.modifiedCount > 0) {
+                console.log(`Successfully removed ${userName} from the likes array.`);
+                return { success: true }
+            } else {
+                console.log("No changes were made.");
+            }
+
+
+        }catch (error) {
+            console.error(error);
+            return { success: false, message: "Failed to unLikePost post" };
         }
     },
 
